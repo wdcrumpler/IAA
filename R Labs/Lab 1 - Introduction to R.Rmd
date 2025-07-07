@@ -1,0 +1,101 @@
+---
+title: "R Programming Lab 1"
+output: html_notebook
+---
+
+## Question 1
+
+What does the log() function do?
+
+```{r}
+log(20)
+```
+Answer: It returns the value of the natural log of the value called with the function
+
+## Question 2
+
+Is the default calculation for the log function natural log or base 10?
+
+```{r}
+log(10)
+```
+Answer: Natural Log
+
+## Question 3
+
+What are the arguments for the log() function?
+
+```{r}
+?log
+```
+
+Answer: log() has two arguments: x, a numeric or complex vector, and base, a positive or complex number: the base with respect to which logarithms are computed. Defaults to e=exp(1).
+
+## Question 4
+
+What is the log of 1.4, base 8.3 (all digits)?
+
+```{r}
+log(x=1.4, base=8.3)
+```
+
+## Question 5
+
+Assign the result of question 4 to the variable "result". Copy code statement in answer box below.
+
+```{r}
+result <- log(x=1.4, base=8.3)
+```
+
+## Question 6
+
+Assign the variable "result" to "result" rounded to thousandth. What is the value of result?
+
+```{r}
+result <- round(result, 3)
+result
+```
+
+## Question 7
+
+What is the value of "result" mod 0.05?
+
+```{r}
+result %% 0.05
+```
+
+## Question 8 
+
+Assign the value 5 to the variable "value". Copy the code statement in the answer box below.
+
+```{r}
+value <- 5
+```
+
+## Question 9
+
+What is "value" divided by "result"?  Please include 5 decimals in your solution
+
+```{r}
+round(value/result,5)
+```
+
+## Question 10
+
+What is the ceiling of "value" divided by "result", divided by the floor of "value" divided by "result" (all digits)?
+
+Follow the order of operations:
+- ceiling of value divided by result
+- divided by
+- floor of value divided by result
+
+```{r}
+num <- ceiling(value/result)
+denom <- floor(value/result)
+ans <- num/denom
+ans
+```
+
+## Question 11
+
+Attach or copy your code below
