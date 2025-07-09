@@ -9,7 +9,7 @@ output:
 
 ## Question 1
 
- Make a vector, "V1", of 100 elements starting from 10 and incremented by 10. What is the total value (sum) of "V1"?
+Make a vector, "V1", of 100 elements starting from 10 and incremented by 10. What is the total value (sum) of "V1"?
 
 ```{r}
 V1 <- seq(from = 10, by = 10, length.out = 100)
