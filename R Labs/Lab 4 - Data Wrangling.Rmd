@@ -1,0 +1,108 @@
+---
+title: "Lab 4 - Data Wrangling"
+output: html_notebook
+---
+
+```{r}
+install.packages(c("data.table","dplyr","stringr"))
+library(data.table)
+library(dplyr)
+library(stringr)
+```
+
+## Question 1
+
+Load the Auto_MPG.csv into a data frame named "df_auto". How many columns are in "df_auto"?
+
+```{r}
+df_auto <- read.csv("Auto_MPG.csv", stringsAsFactors = FALSE)
+dim(df_auto)
+```
+
+## Question 2
+
+Convert "Horsepower" to numeric. How many NAs are in "df_auto" after converting "Horsepower"?
+
+```{r}
+df_auto$Horsepower <- as.numeric(df_auto$Horsepower)
+summary(df_auto)
+df_auto$Horsepower
+summary(df_auto$Horsepower)
+```
+
+## Question 3
+
+Using dplyr, add to "df_auto":
+- Variable named "Car_Make" that is the first word from "Car_Name"
+- Variable named "Car_Model" that is the remaining words (not first) from "Car_Name"
+
+How many observations of "Car_Make" "ford" are there?
+
+```{r}
+df_auto <- df_auto %>%
+  rowwise() %>% 
+  mutate(Car_Make=str_split(Car_Name, " ")[[1]][1]) %>%
+  mutate(Car_Model=paste(str_split(Car_Name, " ")[[1]][-1], collapse=" "))
+
+nrow(filter(df_auto, Car_Make == 'ford'))
+
+```
+
+## Question 4
+
+Using dplyr, how many cars are there for model year 73?
+
+```{r}
+nrow(filter(df_auto, Model_Year == 73))
+```
+
+## Question 5
+
+Using dplyr, what "Car_Make" "ford" car has the highest "Weight_per_Horsepower" (Weight/Horsepower) ratio? Ignore NAs.
+
+```{r}
+df_auto <- mutate(df_auto, Weight_per_Horsepower = Weight/Horsepower)
+
+df_auto %>% filter(Car_Make == 'ford', na.rm = TRUE) %>% arrange(desc(Weight_per_Horsepower))
+```
+
+## Question 6
+
+Using dplyr and stringr, update "df_auto" so all values of "Car_Make" that contain "chev" say "chevrolet".
+
+How many observations have "Car_Make" "chevrolet"?
+
+```{r}
+df_auto <- mutate(df_auto, Car_Make = ifelse(str_detect(Car_Make,'chev'), 'chevrolet', Car_Make))
+
+nrow(filter(df_auto, Car_Make == 'chevrolet'))
+
+```
+
+## Question 7
+
+What is the average MPG for "chevrolet" cars?
+
+```{r}
+df_auto_chevy <- filter(df_auto, Car_Make == 'chevrolet')
+
+mean(df_auto_chevy$MPG)
+
+```
+
+## Question 8
+
+Below is a data frame, "df_auto_start", that contains the first production year for some of the auto makes.
+
+  Car_Make <- c("amc", "audi", "bmw", "buick", "chevrolet", "datsun", "dodge", "ford")
+  First_Year <- c(1954, 1910, 1916, 1903, 1911, 1931, 1900, 1903)
+  df_auto_start <- data.frame(Car_Make=Car_Make, First_Year=First_Year, stringsAsFactors = FALSE)
+
+Using dplyr joins, how many cars exist in the data set where "First_Year" is null?
+
+```{r}
+
+```
+
+
+

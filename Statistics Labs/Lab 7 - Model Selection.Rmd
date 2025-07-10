@@ -1,0 +1,171 @@
+---
+title: "Stats Lab 7 - Model Selection"
+output: html_notebook
+---
+
+```{r}
+install.packages(c("data.table", "dplyr","stringr", "AppliedPredictiveModeling"))
+library(data.table)
+library(dplyr)
+library(stringr)
+library(AppliedPredictiveModeling)
+data(FuelEconomy)
+```
+
+Use the same cars2010 dataset you have used in previous labs. Since we are using R for this lab, to obtain the data, you will need the AppliedPredicitveModeling package. Then, submit the following code:
+
+library(AppliedPredictiveModeling) data(FuelEconomy)
+
+This dataset has variables pertaining to the fuel economy of various cars. DO NOT create a training dataset since cars2010 will be used as the training data and cars2011 and cars2012 will be used at later time periods.
+
+Use the data to perform the following analyses:
+
+Build a regression model predicting the FE variable using all of the remaining variables. Some of these predictors are coded as numeric and should be considered categorical. The only numeric predictor is EngDispl. All remaining variables are categorical. Use forward selection with a 0.1 p-value selection criterion.
+
+```{r}
+cars <- read.csv('https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/cars2010.csv')
+View(cars)
+```
+
+```{r}
+cars_mlr_empty = lm(FE ~ 1, data = cars)
+cars_mlr_full <- lm(FE ~ EngDispl + factor(NumCyl) + factor(Transmission) + 
+            factor(AirAspirationMethod) + factor(NumGears) + 
+            factor(TransLockup) + factor(TransCreeperGear) + 
+            factor(DriveDesc) + factor(IntakeValvePerCyl) + 
+            factor(ExhaustValvesPerCyl) + factor(CarlineClassDesc) + 
+            factor(VarValveTiming) + factor(VarValveLift), 
+            data = cars)
+```
+
+```{r}
+alpha.f=0.1
+cars.step <- step(cars_mlr_empty, scope = list(lower = cars_mlr_empty, upper = cars_mlr_full), direction = 'forward', k = qchisq(alpha.f, 1, lower.tail = FALSE))
+```
+# Question 1a - What was the first variable added?
+
+Answer: EngDispl
+
+# Question 1b - What is the AIC of the model from part b)? (round to 1 decimal)
+
+Answer: 3393.7
+
+# Question 1c - What was the last variable added?
+
+Answer: ExhaustValvesPerCyl
+
+# Question 1d - What is the AIC for the model in part d)? (round to 1 decimal)
+
+Answer: 2625.0
+
+# Question 1e - How many predictor variables are in the final model (I am only interested in how many names of variables. Eg: if hypothetical variable engine_type has 4 levels, it is only 1 variable for this question, not 3 for dummy variables)?
+
+Answer: 12
+
+## Instead of the previous approach, now use stepwise selection using BIC criterion.
+
+```{r}
+cars.step <- step(cars_mlr_empty, scope = list(lower = cars_mlr_empty, upper = cars_mlr_full), direction = 'forward', k = log(nrow(cars)))
+```
+# Question 1f - What is the first variable that is added?
+
+Answer: EngDispl
+
+# Question 1g - What is the BIC for the model in parg g)? Round to 1 decimal
+
+Answer: 3402.3
+
+# Question 1h - What is the last variable that is added?
+
+Answer: TransCreeperGear
+
+# Question 1i - What is the BIC for the model in part i)? Round to 1 decimal
+
+Answer: 2832.1
+
+# Question 1j - How many predictor variables are in the final model (Similarly to part e, I am only interested in how many names of variables. Eg: if hypothetical variable engine_type has 4 levels, it is only 1 variable for this question, not 3 for dummy variables)?
+
+Answer: 8
+
+## We will now revisit the bike dataset. We want to build a couple of different models and see which one is better. We will learn in later lectures how to do this with test datasets, but for right now, we will only do this with training data. First, we need to split the data into training and test. Run the following code to get the training and test split.
+
+set.seed(123)
+bike <- bike %>% mutate(id = row_number())
+train <- bike %>% sample_frac(0.7)
+test <- anti_join(bike, train, by = 'id')
+
+```{r}
+bike <- read.csv('https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/bike.csv')
+```
+
+```{r}
+set.seed(123)
+bike <- bike %>% mutate(id = row_number())
+train <- bike %>% sample_frac(0.7)
+test <- anti_join(bike, train, by = 'id')
+```
+
+# Question 2a - How many observations are in the train dataset?
+
+```{r}
+dim(train)
+```
+Answer: 12165
+
+# Question 2b - How many observations are in the test dataset?
+
+```{r}
+dim(test)
+```
+Answer: 5214
+
+## You want to build a model to predict the number of users (cnt). With all of the variables available to you it would be time consuming to go through by hand to do variable selection. Using the AIC criterion and the training dataset, do a forward selection on the training dataset with the following variables: feeling temperature (atemp), humidity (hum), season of the year (season) as a factor, year (yr) as a factor, hour of the day as a factor, holiday (holiday) as a factor, whether it is a working day (workingday) as a factor, the weather (weathersit) as a factor, and wind speed (windspeed).
+
+```{r}
+bike_mlr_empty = lm(cnt ~ 1, data = train)
+bike_mlr_full <- lm(cnt ~ atemp + hum + factor(season) + factor(yr) + factor(hr) + factor(holiday) + factor(workingday) + factor(weathersit) + windspeed, data = train)
+```
+
+```{r}
+bike.step.aic <- step(bike_mlr_empty, scope = list(lower = bike_mlr_empty, upper = bike_mlr_full), direction = 'forward', k = 2)
+```
+# Question 2c - Which variables are included in the model?
+
+Answer: all of them
+
+## Now, using the same variables, do forward selection using BIC criterion. 
+
+```{r}
+bike.step.bic <- step(bike_mlr_empty, scope = list(lower = bike_mlr_empty, upper = bike_mlr_full), direction = 'forward', k = log(nrow(bike)))
+```
+# Question 2d - Which variables are included in the model?
+
+Answer: All but windspeed and workingday
+
+## Now, create a model with the same variables using backward selection using AIC criterion.
+
+```{r}
+bike.step.aic <- step(bike_mlr_full, scope = list(lower = bike_mlr_empty, upper = bike_mlr_full), direction = 'backward', k = 2)
+```
+# Question 2e - Which variables are included in the model?
+
+Answer: All of them
+
+## Now, create a model with the same variables using backward selection using BIC criterion.
+
+```{r}
+bike.step.bic <- step(bike_mlr_full, scope = list(lower = bike_mlr_empty, upper = bike_mlr_full), direction = 'backward', k = log(nrow(bike)))
+```
+# Question 2f - Which variables are included in the model?
+
+Answer: All but workingday and windspeed
+
+# Question 2g - Are the two AIC criterion models different?
+
+Answer: no
+
+# Question 2h - Are the two BIC criteron models different?
+
+Answer: no
+
+
