@@ -1,0 +1,154 @@
+---
+title: "Stats Lab 8 - Diagnostics Part 1"
+output: html_notebook
+---
+
+```{r}
+library(tidyr)
+library(readr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+```
+
+# Question Set 1
+
+The cafeteria dataset has the following variables:
+
+Cafeteria: cafeteria identification number
+Dispensers: number of dispensers at each cafeteria
+Sales: coffee sales in hundreds of gallons
+
+Perform a simple linear regression with Sales as the response and Dispensers as the predictor.
+
+```{r}
+cafeteria <- read_csv("https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/cafeteria.csv")
+cafeteria_slr <- lm(Sales ~ Dispensers, data = cafeteria)
+```
+
+## Question 1a 
+
+What does the residual vs predicted plot show?
+
+```{r}
+plot(cafeteria_slr)
+```
+
+Answer: A polynomial term needs to be added
+
+## Question 1b
+
+Perform a forward selection (by hard) using the AIC criteria (you will need to use the command model.aic to get the AIC value for each model). The "smallest" model should be just the intercept and the "largest" model should be Dispensers up to the power of 4 (be sure to use model hierarchy). What was the best degree for the polynomial based on AIC?
+
+```{r}
+cafeteria$Dispensers <- cafeteria$Dispensers - mean(cafeteria$Dispensers)
+cafeteria_slr <- lm(Sales ~ Dispensers, data = cafeteria)
+cafeteria_slr2 <- lm(Sales ~ Dispensers + I(Dispensers**2), data = cafeteria)
+cafeteria_slr3 <- lm(Sales ~ Dispensers + I(Dispensers**2) + I(Dispensers**3), data = cafeteria)
+cafeteria_slr4 <- lm(Sales ~ Dispensers + I(Dispensers**2) + I(Dispensers**3) + I(Dispensers**4), data = cafeteria)
+```
+
+```{r}
+AIC(cafeteria_slr)
+AIC(cafeteria_slr2)
+AIC(cafeteria_slr3)
+AIC(cafeteria_slr3)
+```
+
+## Question 1c
+
+```{r}
+plot(cafeteria_slr2)
+```
+
+Answer: Yes
+
+## Question 1d
+
+Does the assumption of homoscedasticity of variance appear to hold here?
+
+Answer: Yes
+
+# Question Set 2
+
+We will use the mtcars dataset. For this problem, use mpg as your response and take a look at the model with cyl, wt, and hp.
+
+```{r}
+mtcars <- read_csv("https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/mtcars.csv")
+mtcars_slr <- lm(mpg ~ cyl + wt + hp, data = mtcars)
+```
+
+## Question 2a
+
+Look at the pair plots for the variables. What interaction terms would be appropriate to consider for the model based on the scatter plots?
+
+```{r}
+mtcars_pair_df <- mtcars %>%
+  select(mpg, cyl, wt, hp)
+
+pairs(mtcars_pair_df)
+```
+
+Answer: cyl*wt, cyl*hp, hp*wt
+
+## Question 2b
+
+In R, forward selection was used to find the following model:
+mpg = wt + cyl + hp + wt:cyl + cyl:hp
+
+What is the AIC of this model? (round to 2 decimals)
+
+```{r}
+mtcars_slr2 <- lm(mpg ~ cyl + hp + wt + wt*cyl + cyl*hp, data = mtcars)
+AIC(mtcars_slr2)
+```
+
+## Question 2c
+
+Look at the residual vs predicted plot. Does the assumption of homoscedasticity of the variance hold?
+
+```{r}
+plot(mtcars_slr2)
+```
+
+Answer: Yes
+
+## Question 2d
+
+Are the residual errors normally distributed?
+
+Answer: Yes
+
+## Question 2e
+
+Backward selection in R was used to find this model:
+mpg = cyl + hp + wt + wt^2 + cyl:hp
+
+What is the AIC of this model? (round to 2 decimals)
+
+```{r}
+mtcars_slr3 <- lm(mpg ~ cyl + hp + wt + wt^2 + cyl*hp, data = mtcars)
+AIC(mtcars_slr3)
+```
+
+## Question 2f
+
+Look at the residual vs predicted plot. Does the assumption of homoscedasticity of the variance hold?
+
+```{r}
+plot(mtcars_slr3)
+```
+
+Answer: No
+
+## Question 2g
+
+Are the residual errors normally distributed?
+
+Answer: Yes
+
+## Question 2h
+
+Based on the criteria we checked, which model should be chosen?
+
+Answer: Model 1
