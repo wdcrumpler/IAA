@@ -1,6 +1,8 @@
 ---
 title: "R Project - wdcrumpl"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r message=FALSE, warning=FALSE}
@@ -102,6 +104,53 @@ survey_birth_year_summary <- survey %>%
   arrange(desc(count))
 ```
 
+Most common birth years:
+
+```{r}
+survey_birth_year_summary %>% slice(1:5)
+```
+
+Least common birth years:
+
+```{r}
+survey_birth_year_summary %>% slice(9:13)
+```
+
+# Step 6
+
+The State column was also open ended, so there are many inconsistencies. Clean this column to eliminate any non-US state, and to standardize the values for State (10 points).
+
+```{r}
+unique(survey$State)
+```
+
+```{r}
+survey$State <- survey$State %>%
+  str_replace_all(c("NC" = "North Carolina", "GA" = "Georgia", "N/A" = "", "Seoul" = "", "Maharashtra" = "")) %>%
+  str_to_title()
+```
+
+```{r}
+survey <- survey %>%
+  mutate(State = na_if(State, ""))
+```
+
+```{r}
+unique(survey$State)
+```
+
+# Step 7
+
+Show the five most frequent states, and the five least frequent state (10 points). 
+
+```{r}
+survey_state_summary <- survey %>%
+  group_by(State) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+```
+
+
 Most common states:
 
 ```{r}
@@ -145,7 +194,7 @@ survey_country_summary
 
 # Step 9
 
-We want to clean the How_Hear_About_Program column by eliminating the number and any extra character portion in those responses (so we keep only the text portion). Show the five most frequent responses to this column (10 points). 
+We want to clean the How_Hear_About_Program column by eliminating the number and any extra character portion in those responses (so we keep only the text portion). Show the five most frequent responses to this column (10 points).
 
 ```{r}
 unique(survey$How_Hear_About_Program)
@@ -170,7 +219,7 @@ survey_how_summary
 
 # Step 10
 
-We want to transform the data from wide to long on column Languages by duplicating the values of the other columns. You can use the comma as a separator for Languages. Show the five most frequent languages (10 points). 
+We want to transform the data from wide to long on column Languages by duplicating the values of the other columns. You can use the comma as a separator for Languages. Show the five most frequent languages (10 points).
 
 ```{r}
 survey_lang_long <- survey %>%
@@ -184,7 +233,7 @@ survey_lang_long_summary <- survey_lang_long %>%
   arrange(desc(count))
 ```
 
-Most common languages: 
+Most common languages:
 
 ```{r}
 survey_lang_long_summary %>% slice(1:5)
