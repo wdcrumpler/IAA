@@ -1,0 +1,197 @@
+---
+title: "R Project - wdcrumpl"
+output: html_notebook
+---
+
+```{r message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(stringr)
+library(tidyr)
+```
+
+Import the "Get to know survey 2025" file
+
+```{r}
+survey <- read_csv('https://raw.githubusercontent.com/andreavillanes/Project_Data_2025/refs/heads/main/Get%20to%20know%20survey%202025.csv')
+```
+
+```{r}
+View(survey)
+```
+
+# Step 1
+
+Create a new column called Birth_Month which has only the month portion of Birth_Month_Year (10 points).
+
+```{r}
+survey$Birth_Month <- str_extract(survey$Birth_Month_Year, "^[^,]*")
+```
+
+# Step 2
+
+Create a new column called Birth_Year which has only the year portion of Birth_Month_Year (10 points).
+
+```{r}
+survey$Birth_Year <- str_extract(survey$Birth_Month_Year, "(?<=,\\s).*")
+```
+
+# Step 3
+
+Since the birth month and birth year were open ended fields, there are many inconsistencies in the data. Standardize the values for Birth_Month and Birth_Year (10 points).
+
+```{r}
+unique(survey$Birth_Year)
+```
+
+```{r}
+survey$Birth_Year <- survey$Birth_Year %>%
+  str_replace("Two Thousand and two", "2002")
+```
+
+```{r}
+unique(survey$Birth_Year)
+```
+
+```{r}
+unique(survey$Birth_Month)
+```
+
+```{r}
+survey$Birth_Month <- survey$Birth_Month %>% 
+  str_replace_all(c("4" = "April", "5" = "May", "10" = "October")) %>%
+  str_to_title()
+```
+
+```{r}
+unique(survey$Birth_Month)
+```
+
+# Step 4
+
+Show the five most frequent birth months, and the five least frequent birth months (10 points)
+
+```{r}
+survey_birth_summary <- survey %>%
+  group_by(Birth_Month) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+  
+```
+
+Most common months:
+
+```{r}
+survey_birth_summary %>% slice(1:5)
+```
+
+Least common months:
+
+```{r}
+survey_birth_summary %>% slice(8:12)
+```
+
+# Step 5
+
+Show the five most frequent birth years, and the five least frequent birth year (10 points).
+
+```{r}
+survey_birth_year_summary <- survey %>%
+  group_by(Birth_Year) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+```
+
+Most common states:
+
+```{r}
+survey_state_summary %>% slice(1:5)
+```
+
+Least common states:
+
+```{r}
+survey_state_summary %>% slice(7:11)
+```
+
+# Step 8
+
+Similar to State, the column Country needs to be standardized. Once you standardize it, show the five most frequent countries, and the five least frequent countries (10 points).
+
+```{r}
+unique(survey$Country)
+```
+
+```{r}
+survey$Country <- survey$Country %>%
+  str_replace_all(c("United States of America" = "United States", "USA" = "United States", "US" = "United States")) %>%
+  str_to_title()
+```
+
+```{r}
+unique(survey$Country)
+```
+
+```{r}
+survey_country_summary <- survey %>%
+  group_by(Country) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+```
+
+```{r}
+survey_country_summary
+```
+
+# Step 9
+
+We want to clean the How_Hear_About_Program column by eliminating the number and any extra character portion in those responses (so we keep only the text portion). Show the five most frequent responses to this column (10 points). 
+
+```{r}
+unique(survey$How_Hear_About_Program)
+```
+
+```{r}
+survey$How_Hear_About_Program <- str_remove(survey$How_Hear_About_Program, "^\\d+\\.\\s")
+```
+
+```{r}
+unique(survey$How_Hear_About_Program)
+```
+
+```{r}
+survey_how_summary <- survey %>%
+  group_by(How_Hear_About_Program) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+
+survey_how_summary
+```
+
+# Step 10
+
+We want to transform the data from wide to long on column Languages by duplicating the values of the other columns. You can use the comma as a separator for Languages. Show the five most frequent languages (10 points). 
+
+```{r}
+survey_lang_long <- survey %>%
+  separate_longer_delim(Languages, delim = ",")
+```
+
+```{r}
+survey_lang_long_summary <- survey_lang_long %>%
+  group_by(Languages) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+```
+
+Most common languages: 
+
+```{r}
+survey_lang_long_summary %>% slice(1:5)
+```
+
+Least common languages:
+
+```{r}
+survey_lang_long_summary %>% slice(9:13)
+```
