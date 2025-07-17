@@ -1,0 +1,353 @@
+---
+title: "Stats Lab 10 - Model Selection"
+output: html_notebook
+---
+
+```{r}
+library(tidyr)
+library(readr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(GGally)
+library(car)
+library(nortest)
+```
+
+```{r}
+ames <- read_csv('https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/Ames.csv')
+```
+
+```{r}
+ames <- na.omit(ames)
+```
+
+
+```{r}
+set.seed(123)
+n<-nrow(ames)
+train_index<-sample(seq_len(n), size=0.7*n)
+remaining<-setdiff(seq_len(n), train_index)
+
+train_logical <- sample(c(TRUE, FALSE), size = n, replace = TRUE, prob = c(0.7, 0.3))
+
+train <- ames[train_logical, ]
+test <- ames[!train_logical, ]
+```
+
+```{r}
+train_model <- lm(Sale_Price ~ 
+            C(MS_SubClass) + 
+            C(MS_Zoning) + 
+            Lot_Frontage + 
+            Lot_Area + 
+            C(Street) + 
+            C(Alley) + 
+            C(Lot_Shape) + 
+            C(Land_Contour) + 
+            C(Lot_Config) + 
+            C(Land_Slope) + 
+            C(Neighborhood) + 
+            C(Condition_1) + 
+            C(Condition_2) + 
+            C(Bldg_Type) + 
+            C(House_Style) + 
+            C(Overall_Qual) + 
+            C(Overall_Cond) + 
+            Year_Built + 
+            Year_Remod_Add + 
+            C(Roof_Style) + 
+            C(Roof_Matl) + 
+            C(Exterior_1st) + 
+            C(Exterior_2nd) + 
+            C(Mas_Vnr_Type) + 
+            Mas_Vnr_Area + 
+            C(Exter_Qual) + 
+            C(Exter_Cond) + 
+            C(Foundation) + 
+            C(Bsmt_Qual) + 
+            C(Bsmt_Cond) + 
+            C(Bsmt_Exposure) + 
+            C(BsmtFin_Type_1) + 
+            BsmtFin_SF_1 + 
+            C(BsmtFin_Type_2) + 
+            BsmtFin_SF_2 + 
+            Bsmt_Unf_SF + 
+            Total_Bsmt_SF + 
+            C(Heating) + 
+            C(Heating_QC) + 
+            C(Central_Air) + 
+            C(Electrical) + 
+            First_Flr_SF + 
+            Second_Flr_SF + 
+            Low_Qual_Fin_SF + 
+            Gr_Liv_Area + 
+            Bsmt_Full_Bath + 
+            Bsmt_Half_Bath + 
+            Full_Bath + 
+            Half_Bath + 
+            Bedroom_AbvGr + 
+            Kitchen_AbvGr + 
+            C(Kitchen_Qual) + 
+            TotRms_AbvGrd + 
+            C(Functional) + 
+            Fireplaces + 
+            C(Fireplace_Qu) + 
+            C(Garage_Type) + 
+            C(Garage_Finish) + 
+            Garage_Cars + 
+            Garage_Area + 
+            C(Garage_Qual) + 
+            C(Garage_Cond) + 
+            C(Paved_Drive) + 
+            Wood_Deck_SF + 
+            Open_Porch_SF + 
+            Enclosed_Porch + 
+            Three_season_porch + 
+            Screen_Porch + 
+            Pool_Area + 
+            C(Pool_QC) + 
+            C(Fence) + 
+            C(Misc_Feature) + 
+            Misc_Val + 
+            Mo_Sold + 
+            Year_Sold + 
+            C(Sale_Type) + 
+            C(Sale_Condition) + 
+            Longitude + 
+            Latitude, 
+            data = train)
+```
+
+```{r}
+train_model_empty <- lm(Sale_Price ~ 1, data = train)
+```
+
+```{r}
+ames_model_forward <- step(train_model_empty, scope = list(lower = train_model_empty, upper = train_model), direction = 'forward', k = 2)
+```
+
+```{r}
+ames_2 <- lm(Sale_Price ~ C(Overall_Qual) + Gr_Liv_Area + C(Neighborhood) + 
+    C(MS_SubClass) + C(Roof_Matl) + C(Bsmt_Exposure) + C(Condition_2) + 
+    Year_Built + C(Overall_Cond) + Bsmt_Full_Bath + Total_Bsmt_SF + 
+    Bsmt_Unf_SF + C(Sale_Condition) + Garage_Area + C(Kitchen_Qual) + 
+    Lot_Area + C(Bsmt_Qual) + C(Condition_1) + C(Functional) + 
+    C(Exterior_1st) + Mas_Vnr_Area + Screen_Porch + C(Pool_QC) + 
+    Fireplaces + C(Land_Slope) + Year_Remod_Add + Low_Qual_Fin_SF + 
+    C(BsmtFin_Type_1) + C(Street) + C(BsmtFin_Type_2) + C(Land_Contour) + 
+    First_Flr_SF + Bedroom_AbvGr + C(Fireplace_Qu) + C(Exter_Qual) + 
+    C(Roof_Style) + C(Mas_Vnr_Type) + Kitchen_AbvGr + C(Central_Air) + 
+    Full_Bath + Half_Bath + Enclosed_Porch, data = train)
+
+# Output of forward step
+```
+
+```{r}
+ames_3 <- lm(Sale_Price ~ C(Overall_Qual) + Gr_Liv_Area + C(Neighborhood) + 
+    C(MS_SubClass) + C(Roof_Matl) + C(Bsmt_Exposure) + C(Condition_2) + 
+    Year_Built + C(Overall_Cond) + Bsmt_Full_Bath, data = train)
+```
+
+```{r}
+summary(ames_3)
+```
+
+```{r}
+plot(ames_3)
+```
+
+```{r}
+ames_4 <- lm(log(Sale_Price) ~ C(Overall_Qual) + Gr_Liv_Area + C(Neighborhood) + 
+    C(MS_SubClass) + C(Roof_Matl) + C(Bsmt_Exposure) + C(Condition_2) + 
+    Year_Built + C(Overall_Cond) + Bsmt_Full_Bath, data = train)
+```
+
+```{r}
+plot(ames_4)
+```
+
+```{r}
+crPlots(ames_4)
+```
+
+```{r}
+mae <- mean(abs(residuals(ames_4)))
+mae
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+ames_step <- step(train_model, direction = "both")
+
+```
+
+```{r}
+ames_step_1 <- lm(Sale_Price ~ Lot_Area + C(Street) + C(Land_Contour) + C(Lot_Config) + 
+    C(Land_Slope) + C(Neighborhood) + C(Condition_1) + C(Condition_2) + 
+    C(Bldg_Type) + C(Overall_Qual) + C(Overall_Cond) + Year_Built + 
+    Year_Remod_Add + C(Roof_Matl) + C(Exterior_1st) + C(Mas_Vnr_Type) + 
+    Mas_Vnr_Area + C(Exter_Qual) + C(Bsmt_Qual) + C(Bsmt_Exposure) + 
+    C(BsmtFin_Type_1) + C(BsmtFin_Type_2) + Bsmt_Unf_SF + Total_Bsmt_SF + 
+    First_Flr_SF + Second_Flr_SF + Full_Bath + Bedroom_AbvGr + 
+    Kitchen_AbvGr + C(Kitchen_Qual) + C(Functional) + Fireplaces + 
+    Garage_Cars + Wood_Deck_SF + Screen_Porch + C(Pool_QC) + 
+    C(Misc_Feature) + C(Sale_Condition), data = train)
+
+summary(ames_step_1)
+```
+
+```{r}
+ames_step_2 <- lm(Sale_Price ~ Lot_Area + C(Street) + C(Land_Contour) + C(Lot_Config) + 
+    C(Land_Slope) + C(Neighborhood) + C(Condition_1) + C(Condition_2) + C(Overall_Qual) + C(Overall_Cond) + Year_Built + 
+    Year_Remod_Add + C(Roof_Matl) + C(Exterior_1st) + C(Mas_Vnr_Type) + 
+    Mas_Vnr_Area + C(Exter_Qual) + C(Bsmt_Qual) + C(Bsmt_Exposure) + 
+    C(BsmtFin_Type_1) + C(BsmtFin_Type_2) + Bsmt_Unf_SF + Total_Bsmt_SF + 
+    First_Flr_SF + Second_Flr_SF + Full_Bath + Bedroom_AbvGr + 
+    Kitchen_AbvGr + C(Kitchen_Qual) + C(Functional) + Fireplaces + 
+    Garage_Cars + Wood_Deck_SF + Screen_Porch + C(Pool_QC) + 
+    C(Misc_Feature) + C(Sale_Condition), data = train)
+
+summary(ames_step_2)
+```
+
+```{r}
+ames_step_3 <- lm(Sale_Price ~ Lot_Area + C(Street) + C(Land_Contour) + C(Lot_Config) + 
+    C(Land_Slope) + C(Neighborhood) + C(Condition_1) + C(Condition_2) + C(Overall_Qual) + C(Overall_Cond) + Year_Built + 
+    Year_Remod_Add + C(Roof_Matl) + C(Exterior_1st) + C(Mas_Vnr_Type) + 
+    Mas_Vnr_Area + C(Exter_Qual) + C(Bsmt_Qual) + C(Bsmt_Exposure) + C(BsmtFin_Type_2) + Bsmt_Unf_SF + Total_Bsmt_SF + 
+    First_Flr_SF + Second_Flr_SF + Full_Bath + Bedroom_AbvGr + 
+    Kitchen_AbvGr + C(Kitchen_Qual) + C(Functional) + Fireplaces + 
+    Garage_Cars + Wood_Deck_SF + Screen_Porch + C(Pool_QC) + C(Sale_Condition), data = train)
+```
+
+```{r}
+vif(ames_step_3)
+
+# All good, multicollinearity taken care of
+```
+
+```{r}
+summary(ames_step_3)
+```
+
+```{r}
+ames_empty = lm(Sale_Price ~ 1, data = train)
+```
+
+```{r}
+ames_step_4 <- step(ames_empty, scope = list(lower = ames_empty, upper = ames_step_3), direction = 'forward', k = 2)
+```
+
+```{r}
+summary(ames_step_4)
+```
+
+```{r}
+ames_step_5 <- lm(formula = Sale_Price ~ C(Overall_Qual) + C(Neighborhood) + 
+    First_Flr_SF + Second_Flr_SF + C(Roof_Matl) + C(Bsmt_Exposure) + 
+    C(Overall_Cond) + Year_Built + Bsmt_Unf_SF, data = train)
+
+# Selected 10 most informative variables from ames_step_4 forward step process
+```
+
+```{r}
+summary(ames_step_5)
+```
+
+```{r}
+plot(ames_step_5)
+```
+
+```{r}
+crPlots(ames_step_5)
+```
+
+```{r}
+train_c <- train
+train_c$First_Flr_SF <- scale(train_c$First_Flr_SF, scale=F)
+```
+
+```{r}
+ames_step_6 <- lm(formula = Sale_Price ~ C(Overall_Qual) + C(Neighborhood) + 
+    First_Flr_SF + I(First_Flr_SF^2) + Second_Flr_SF + C(Roof_Matl) + C(Bsmt_Exposure) + 
+    C(Overall_Cond) + Year_Built, data = train_c)
+
+# Removed last variable and added a quadradic for first floor square footage
+```
+
+```{r}
+plot(ames_step_6)
+```
+
+```{r}
+ames_step_7 <- lm(formula = log(Sale_Price) ~ C(Overall_Qual) + C(Neighborhood) + 
+    First_Flr_SF + I(First_Flr_SF^2) + Second_Flr_SF + C(Roof_Matl) + C(Bsmt_Exposure) + 
+    C(Overall_Cond) + Year_Built, data = train_c)
+
+# Transformed sales price into a log
+
+summary(ames_step_7)
+```
+
+```{r}
+plot(ames_step_7)
+```
+
+```{r}
+crPlots(ames_step_7)
+```
+
+```{r}
+shapiro.test(residuals(ames_step_7))
+```
+
+```{r}
+ad.test(residuals(ames_step_7))
+```
+
+```{r}
+# Based on intuition
+
+ames_step_8 <- lm(formula = log(Sale_Price) ~ C(Overall_Qual) + C(Neighborhood) + 
+    First_Flr_SF + I(First_Flr_SF^2) + Second_Flr_SF + C(Roof_Matl) + C(Bsmt_Exposure) + 
+    C(Overall_Cond) + Year_Built, data = train_c)
+```
+
+
+
+
+```{r}
+mae <- mean(abs(residuals(ames_step_7)))
+mae
+```
+```{r}
+test_c <- test
+test_c$First_Flr_SF <- scale(test_c$First_Flr_SF, scale=F)
+ames_test_model <- lm(formula = log(Sale_Price) ~ C(Overall_Qual) + C(Neighborhood) + 
+    First_Flr_SF + I(First_Flr_SF^2) + Second_Flr_SF + C(Roof_Matl) + C(Bsmt_Exposure) + 
+    C(Overall_Cond) + Year_Built, data = test_c)
+  
+print(mean(abs(residuals(ames_test_model))))
+```
+
+
+
+
+
+
+
+
+
+
+
+

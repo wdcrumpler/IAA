@@ -1,0 +1,131 @@
+---
+title: "Statistics Lab 9 - Diagnostics Part 2"
+output: html_notebook
+---
+
+```{r}
+library(tidyr)
+library(readr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+```
+
+# Question Set 1
+
+For the next few questions, we will revisit the mtcars data set. Use the whole data set (do not subset).
+
+```{r}
+mtcars <- read_csv("https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/mtcars.csv")
+```
+
+## Question 1
+
+Create the Pearson's correlation between all the quantitative x-variables.  What is the largest value in magnitude of the correlation among the x-variables?
+
+```{r}
+mtcars
+```
+
+
+```{r}
+mtcars_corr_matrix <- cor(mtcars[-1])
+mtcars_corr_matrix
+```
+
+```{r}
+mtcars_corr_matrix_r_sorted <- sort(abs(mtcars_corr_matrix))
+mtcars_corr_matrix_r_sorted
+```
+
+## Question 2
+
+Create the linear model: wt + hp + wt*hp and look at the QQ-plot.  In this plot, Normality seems like a reasonable assumption?
+
+```{r}
+mtcars_mlr1 <- lm(mpg ~ wt + hp + wt*hp, data = mtcars)
+plot(mtcars_mlr1)
+```
+
+## Question 3
+
+Using the model from above, create the residual plot.  What would be your conclusion about the assumption of homogeneity of the variance?
+
+Answer: Homogeneity of the variance appears appropriate since the spread of the residuals are fairly consistent.
+
+## Question 4
+
+We can use the residual plot to help us decide if the errors are Normally distributed.
+
+Answer: False
+
+# Question Set 2
+
+For the rest of the problems, we will be using the cars2010 data set (this data set is a training data set, so you do not need to subset....use the entire data set).
+
+```{r}
+cars <- read_csv("https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/cars2010.csv")
+```
+
+## Question 5
+
+Create the linear model with the following variables and calculate the Cook's D statistic.  What is the largest value for Cook's D (recall that FE..Fuel Economy is the response variable)? Keep answer accuracy to three decimal places.
+
+```{r}
+cars_mlr <- lm(FE ~ EngDispl + C(Transmission) + C(AirAspirationMethod) + C(TransLockup) + C(TransCreeperGear) + C(DriveDesc) + C(IntakeValvePerCyl) + C(CarlineClassDesc) + C(VarValveLift), data = cars)
+
+cars_cook <- cooks.distance(cars_mlr)
+sort(cars_cook, decreasing = TRUE)
+```
+
+## Question 6
+
+Now let's use the Hat values to identify influential points and external studentized residuals to identify outliers.  How many observations are above the Hat value cutoff AND has a magnitude above 3?
+
+```{r}
+c.index = seq(1, nrow(cars))
+
+h_threshold <- 20/nrow(cars)
+h_bool = hatvalues(cars_mlr)>h_threshold
+h_plot = ggplot(cars_mlr, aes(x = c.index, y=hatvalues(cars_mlr))) + geom_point() + geom_line(y=h_threshold)
+plot(h_plot)
+
+rstudent_bool = abs(rstudent(cars_mlr))>3
+rstudent_plot = ggplot(cars_mlr, aes(x = c.index, y=rstudent(cars_mlr))) + geom_point() + geom_line(y=3) + geom_line(y=-3)
+plot(rstudent_plot)
+
+both_bool = h_bool & rstudent_bool
+num_influence = sum(both_bool)
+num_influence
+```
+
+```{r}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

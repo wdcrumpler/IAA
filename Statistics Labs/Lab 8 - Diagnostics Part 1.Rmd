@@ -75,7 +75,7 @@ We will use the mtcars dataset. For this problem, use mpg as your response and t
 
 ```{r}
 mtcars <- read_csv("https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/mtcars.csv")
-mtcars_slr <- lm(mpg ~ cyl + wt + hp, data = mtcars)
+mtcars_slr <- lm(mpg ~ C(cyl) + wt + hp, data = mtcars)
 ```
 
 ## Question 2a
@@ -99,7 +99,7 @@ mpg = wt + cyl + hp + wt:cyl + cyl:hp
 What is the AIC of this model? (round to 2 decimals)
 
 ```{r}
-mtcars_slr2 <- lm(mpg ~ cyl + hp + wt + wt*cyl + cyl*hp, data = mtcars)
+mtcars_slr2 <- lm(mpg ~ C(cyl) + hp + wt + wt*C(cyl) + C(cyl)*hp, data = mtcars)
 AIC(mtcars_slr2)
 ```
 
@@ -127,7 +127,7 @@ mpg = cyl + hp + wt + wt^2 + cyl:hp
 What is the AIC of this model? (round to 2 decimals)
 
 ```{r}
-mtcars_slr3 <- lm(mpg ~ cyl + hp + wt + wt^2 + cyl*hp, data = mtcars)
+mtcars_slr3 <- lm(mpg ~ C(cyl) + hp + wt + wt^2 + C(cyl)*hp, data = mtcars)
 AIC(mtcars_slr3)
 ```
 
