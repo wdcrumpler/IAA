@@ -1,0 +1,19 @@
+Order ID,Date,Store,Product Category,Product,Units Sold,Unit Price,Revenue,Month
+1000,2024-03-12,East,Electronics,Headphones,5.0,486.0,2430.0,Mar
+1001,2024-02-22,West,Clothing,Jeans,2.0,433.0,866.0,Feb
+1002,2024-03-29,West,Furniture,Chair,1.0,189.0,189.0,Mar
+1003,2024-02-20,South,Clothing,Jeans,5.0,346.0,1730.0,Feb
+1004,2024-01-09,South,Electronics,Phone,5.0,111.0,555.0,Jan
+1005,2024-03-21,East,Clothing,Jeans,4.0,407.0,1628.0,Mar
+1006,2024-01-18,South,Electronics,Headphones,2.0,289.0,578.0,Jan
+1007,2024-02-09,West,Electronics,Phone,5.0,357.0,1785.0,Feb
+1009,2024-01-08,East,Clothing,Shirt,3.0,398.0,1194.0,Jan
+1010,2024-02-02,East,Electronics,Phone,7.0,235.0,1645.0,Feb
+1012,2024-02-11,East,Clothing,Jeans,3.0,250.0,750.0,Feb
+1013,2024-01-15,North,Clothing,Jacket,5.0,346.0,1730.0,Jan
+1014,2024-01-06,North,Furniture,Desk,5.0,350.0,1750.0,Jan
+1015,2024-01-27,South,Electronics,Laptop,9.0,252.0,2268.0,Jan
+1016,2024-02-20,South,Electronics,Laptop,5.0,393.0,1965.0,Feb
+1017,2024-02-21,South,Electronics,Phone,7.0,132.0,924.0,Feb
+1018,2024-03-27,South,Furniture,Chair,5.0,404.0,2020.0,Mar
+1019,2024-03-08,West,Furniture,Table,7.0,142.0,994.0,Mar
