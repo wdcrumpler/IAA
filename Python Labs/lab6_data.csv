@@ -1,0 +1,16 @@
+Name,Age,City,Income
+Alice,25.0,New York,60000.0
+Bob,,Chicago,55000.0
+Charlie,30.0,,72000.0
+David,28.0,Boston,
+Emma,,Seattle,65000.0
+Frank,33.0,Miami,71000.0
+Grace,29.0,Austin,68000.0
+Hannah,22.0,Denver,
+Ian,,Dallas,63000.0
+Jack,40.0,,59000.0
+Karen,31.0,Portland,57000.0
+Leo,27.0,Atlanta,61000.0
+Mona,,Phoenix,
+Nina,24.0,Houston,56000.0
+Oscar,36.0,Las Vegas,75000.0
