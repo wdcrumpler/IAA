@@ -1,0 +1,143 @@
+---
+title: "Statts Assessment 3"
+output: html_notebook
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(glmnet)
+library(ggplot2)
+library(gmodels)
+library(epitools)
+library(DescTools)
+library(vcd)
+library(vcdExtra)
+library(nortest)
+library(survival)
+library(car)
+```
+
+# Question Set 3
+
+You are conducting a study to try to determine factors that influence your customers buying a specific product. You have results from recent customer data. Variables in the buy data set are:
+
+Buy: 1 for bought the product, 0 for not buying the product
+
+Loyalty: "Yes" for the customer who is in the loyalty program, "No" if they are not in the loyalty program
+
+Age: age of customer
+
+You will use ALL data to perform this analysis (i.e. no need to split into training/validation). Use this information and data set to answer the following questions.
+
+```{r}
+buy <- read_csv('https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/master/product_buy.csv')
+```
+
+```{r}
+head(buy)
+```
+
+```{r}
+buy$Loyalty <- as.factor(buy$Loyalty)
+buy$Buy <- as.factor(buy$Buy)
+```
+
+Construct a cross-tabulation table between Buy and Loyalty. Use this to answer the following three questions.
+
+```{r}
+CrossTable(buy$Loyalty, buy$Buy)
+```
+
+## Question 17
+
+What percentage of customers overall are part of the loyalty program?
+
+Answer: 48.8%
+
+## Question 18
+
+What percentage of customers overall have bought the product? 
+
+Answer: 48.4
+
+## Question 19
+
+What percentage of customers bought the product given that they are part of the loyalty program (in other words, only considering those who are in the loyalty program, what percentage bought the product)?
+
+Answer: 58.6
+
+## Question 20
+
+Based on your previous cross-tabulation table between Buy and Loyalty, comment on the possible association between Buy and Loyalty. DO NOT do formal tests yet, just comment based solely on the cross-tabulation table.
+
+Loyalty members had a higher buy rate (58.6%) than non-loyalty members (38.3%), indicating that loyalty membership may plausibly have some effect on the likelihood of a purchase. 
+
+## Question 21
+
+Perform the appropriate Chi-square test for linear association between Buy and Loyalty.  What is the value of the test statistic?  Keep answer to one decimal point.
+
+```{r}
+CMHtest(table(buy$Loyalty, buy$Buy))$table[1,]
+```
+
+Test statistic: 11.2
+
+## Question 22
+
+Based on the previous test, what did you get for the p-value?  
+
+Answer: 0.000813 < 0.001
+
+## Question 23
+
+You want to also account for Age in a model as well as Loyalty. Run a logistic regression model modeling Buy with Loyalty and Age as predictors. State the parameter estimate in the model for Age. Keep answer accurate to three decimal places.
+
+```{r}
+buy_log <- glm(Buy ~ Age + Loyalty, data = buy, family = binomial(link = "logit"))
+summary(buy_log)
+```
+
+Answer: -0.053
+
+## Question 24
+
+Using the model from the previous question, what is the parameter estimate in the model for Loyalty (Y). Keep answer accurate to three decimal places.
+
+Answer: 0.766
+
+## Question 25
+
+Using the results from the previous logistic regression model, transform the coefficient on the Loyalty variable to make it easier to interpret. Interpret the effect of the Loyalty variable.
+
+```{r}
+100*(exp(cbind(coef(buy_log), confint(buy_log)))-1)
+```
+
+Answer: Being a loyalty member results in a 115% increase in the odds of making a purchase.
+
+## Question 26
+
+What is the percentage concordance for this model?
+
+```{r}
+survival::concordance(buy_log)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

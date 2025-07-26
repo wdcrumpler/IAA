@@ -1,0 +1,8 @@
+customer_id,item,amount
+1,Book,12.99
+1,Pen,1.49
+2,Notebook,5.25
+3,Backpack,25.0
+3,Laptop,799.99
+7,Mouse,14.5
+7,Keyboard,30.0

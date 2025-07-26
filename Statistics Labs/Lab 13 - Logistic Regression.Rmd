@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+install.packages('glmnet')
+library(glmnet)
+```
+
+
+We will be using data from a bike sharing company (Capital Bike Share). Each hour, the number of riders (cnt) is given, along with various other attributes
+
+```{r}
+safety <- read_csv('https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/safety.csv')
+```
+
+# Question 6
+Remove variables one at a time that have a p-value above 0.05.  Once we are done, the variables left in the model are Size and Weight.
+
+```{r}
+empty_log_model <- glm(Unsafe ~ 1, data = safety, family = binomial(link = "logit"))
+log_model <- glm(Unsafe ~ C(Region) + C(Size) + Weight, data = safety, family = binomial(link = "logit"))
+summary(log_model)
+```
+
+```{r}
+back.model <- step(log_model,
+                  scope = list(lower = empty_log_model,
+                               upper = log_model),
+                  direction = "backward", k = qchisq(0.05, 1, lower.tail = FALSE))
+```
+
+```{r}
+
+```
+
+
+
+

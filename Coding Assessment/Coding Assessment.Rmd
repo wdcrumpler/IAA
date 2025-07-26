@@ -1,0 +1,190 @@
+---
+title: "Computing Assessment"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(tidyr)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(lubridate)
+```
+
+# R Programming Part 1
+
+For this portion of the assessment, we will be working with the MPG dataset. To answer the questions, you will need to complete the following tasks:
+- Read the "Auto_MPG_Exam.csv" data. Name your data df_auto. Ensure stringAsFactors=FALSE
+- Create a column named "Car_Make" from the first element of the "Car_Name" variable
+- Update "horsepower" to be type numeric
+- Change the type of "Cylinders", "Model_Year", and "Origin" from numeric to character (Hint: you will need to use the as.character function)
+
+```{r}
+df_auto <- read_csv('Auto_MPG_Exam.csv')
+```
+
+```{r}
+df_auto$Car_Make <- stringr::word(df_auto$Car_Name, 1)
+```
+
+```{r}
+df_auto$Horsepower <- as.numeric(df_auto$Horsepower)
+df_auto$Cylinders <- as.character(df_auto$Cylinders)
+df_auto$Model_Year <- as.character(df_auto$Model_Year)
+df_auto$Origin <- as.character(df_auto$Origin)
+```
+
+## Question 16
+
+How many unique values of "Car_Make" are there? 
+
+```{r}
+n_distinct(df_auto$Car_Make)
+```
+
+## Question 17
+
+How many variables in "df_auto" are of type character?
+
+```{r}
+str(df_auto)
+```
+
+We are going to create a function that provides univariate analysis on a provided variable vector, named “data”. Create a function "univariate_analysis" that:
+- Calculates the number of observations, mean, standard deviation, and quartiles of a provided vector.
+- Ensure the na.rm argument is TRUE when calculating the mean, standard deviation, and the quartiles.
+- Have the function return the results in a list with named elements "obs", "mean", "stdev", and "quartiles"
+
+```{r}
+univariate_analysis <- function(data) {
+  obs = length(data)
+  mean = mean(data, na.rm = TRUE)
+  stdev = sd(data, na.rm = TRUE)
+  quartiles = quantile(data, probs=c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+  return(list(obs, mean, stdev, quartiles))
+}
+```
+
+
+## Question 18
+
+Using the function created, what is the 2nd quartile (the median, the 50th percentile) of "MPG"?
+
+```{r}
+univariate_analysis(df_auto$MPG)
+```
+
+To the "univariate_analysis" function, create a histogram plot named "histogram" using the code provided below. Add the plot to the return list with the element named "histogram":
+
+histogram <- ggplot(data=data.frame(x=data), aes(x=x)) +  geom_histogram()
+
+```{r}
+univariate_analysis <- function(data) {
+  obs = length(data)
+  mean = mean(data, na.rm = TRUE)
+  stdev = sd(data, na.rm = TRUE)
+  quartiles = quantile(data, probs=c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+  histogram <- ggplot(data=data.frame(x=data), aes(x=x)) +  geom_histogram()
+  return(list(obs, mean, stdev, quartiles, histogram))
+}
+```
+
+## Question 19
+
+What is the default number of bins in the histogram for "MPG"?
+
+```{r}
+univariate_analysis(df_auto$MPG)
+```
+
+Thus far, we have assumed the variable provided will be numeric. However, we should account for categorical variables. Update the "univariate_analysis" function:
+- If the provided vector is numeric, execute everything created in the function thus far (Hint: you can use is.numeric(data)==TRUE to evaluate this condition)
+- If the provided vector is character (is.character(data)==TRUE):
+- Store the number of elements in the vector in a variable named "obs"
+- Store the unique values of the vector in a variable named "unique_levels". You can use unique(data) to calculate this.
+- Create a bar chart named "bar_chart" using the code provided below. This code plots the number of observations by the unique levels of the variable:
+bar_chart <- ggplot(data=data.frame(x=data), aes(x=x)) + geom_bar()
+- Returns the previous variables in a list with the elements named "obs", "unique_levels", and "bar_chart")
+
+```{r}
+univariate_analysis <- function(data) {
+  if(is.numeric(data) == TRUE) {
+    obs = length(data)
+    mean = mean(data, na.rm = TRUE)
+    stdev = sd(data, na.rm = TRUE)
+    quartiles = quantile(data, probs=c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+    histogram <- ggplot(data=data.frame(x=data), aes(x=x)) +  geom_histogram()
+    return(list(obs, mean, stdev, quartiles, histogram))
+  }
+  
+  else if(is.character(data) == TRUE) {
+    obs = length(data)
+    unique_levels = unique(data)
+    bar_chart <- ggplot(data=data.frame(x=data), aes(x=x)) + geom_bar()
+    return(list(obs, unique_levels, bar_chart))
+  }
+}
+```
+
+## Question 20
+
+Using the function created, what is the median of "Displacement"? (Round your answer to 1 decimal place, example: nn.n)
+
+```{r}
+univariate_analysis(df_auto$Displacement)
+```
+
+## Question 21
+
+Using the function created, what is the most common number of cylinders for cars in the data set?  
+
+```{r}
+univariate_analysis(df_auto$Cylinders)
+```
+
+# R Programming Part 2
+
+For this portion of the assessment, we will be working with “traffic_stops_R.csv”. Read the “Traffic_stops_R.csv” data into R.
+
+We want to create a new dataframe that meets the following criteria:
+- The new dataframe contains only the violation and weekday column when the stop occurred for female drivers of age greater than 60 that were stopped on a Sunday. To achieve this:
+- First create a subset dataframe where you will need to filter the data for female drivers of age greater than 60.
+- Next, using your subset dataframe and the library lubridate, add a new column called weekday_of_stop containing the number of the weekday when the stop
+occurred. Use the wday(mdy(stop_date)) function to create this new column (Sunday = 1).
+- Don’t forget to filter for those drivers that were stopped on a Sunday.
+
+```{r}
+traffic_raw <- read_csv('traffic_stops_R.csv')
+```
+
+```{r}
+traffic <- traffic_raw %>% filter(driver_gender == 'female' & driver_age >60)
+dim(traffic)
+```
+
+```{r}
+traffic <- traffic %>% mutate(weekday_of_stop = wday(mdy(stop_date)))
+traffic <- traffic %>% filter(weekday_of_stop != 1)
+```
+
+## Question 22
+
+How many observations does your new dataframe contains?
+
+```{r}
+dim(traffic)
+```
+
+## Question 23
+
+What is the most frequent driving violation in your new dataframe?
+
+```{r}
+traffic %>% count(violation)
+```
+
+
+

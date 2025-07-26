@@ -1,0 +1,153 @@
+---
+title: "Stats Lab 12 - Categorical Associations"
+output: html_notebook
+---
+
+```{r}
+library(readr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(gmodels)
+library(epitools)
+library(DescTools)
+library(vcd)
+library(vcdExtra)
+install.packages('vcdExtra')
+```
+
+# Question Set 1
+
+For this question, we will be using the safety dataset. Data were collected in an effort to relate the safety of certain vehicles to different aspects of vehicles. 
+
+This dataset has the following variables:
+Unsafe: binary safety designations (1 = below average/unsafe, 0 = average or above average/safe)
+Type: type of care (large, medium, small, sport/utlilty, sports)
+Region: manufacturing region(Asia, N. America)
+Weight: Integer value for car weight ranging from 1 to 6
+Size: size of car corresponding to Tpye (1 = small/sports, 2 = medium, 3 = large or sport/utility)
+
+Do not create a training and testset, just use the whole dataset for the following analysis.
+
+Examine the association between Region and Unsafe.
+
+```{r}
+safety <- read_csv('https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/safety.csv')
+spec(safety)
+```
+
+## Question 1a
+
+What percentage of cars manufactured in Asia were classified as unsafe? Round to 1 decimal (keep in mind, the question asks for a percentage, not proportion)
+
+```{r}
+CrossTable(safety$Unsafe, safety$Region)
+```
+
+Answer: 57.1%
+
+## Question 1b
+
+What percentage of cars classified as safe were manufactured in North America?
+
+Answer: 50.0%
+
+## Question 1c
+
+What are the odds that a car manufactured in Asia is safe (remember the definition of the safety variable... 1=unsafe)? Round to 2 decimals
+
+```{r}
+0.571/0.429 
+```
+
+## Question 1d
+
+What are the odds that a car manufactured in North America is safe? Round to 3 decimals
+
+```{r}
+0.754/0.246
+```
+
+## Question 1e
+
+What are the odds of a car manufactured in Asia being safe vs a car manufactured in North America? Round to 4 decimals
+
+```{r}
+asia_safe <- 0.571/0.429
+na_safe <- 0.754/0.246
+asia_safe / na_safe
+```
+
+# Question Set 2
+
+We will be using the bike dataset for this question. Use the following code to obtain the train/test dataset split:
+
+set.seed(123)
+bike <- bike %>% mutate(id = row_number())
+train <- bike %>% sample_frac(0.7)
+test <- anti_join(bike, train, by = 'id')
+
+We will be using the following variables:
+
+There are abnormal times where the number of casual users is greater than or equal to the number of registered users. You can use the following code to create a variable casual_high that captures this:
+
+train$casual_high <- train$casual >= train$registered
+
+```{r}
+bike <- read_csv('https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/refs/heads/master/bike.csv')
+```
+
+```{r}
+set.seed(123)
+bike <- bike %>% mutate(id = row_number())
+train <- bike %>% sample_frac(0.7)
+test <- anti_join(bike, train, by = 'id')
+```
+
+```{r}
+train$casual_high <- train$casual >= train$registered
+```
+
+## Question 2a
+
+You want to know if the occurrence of these times is related to the season of the year. Even though season is ordinal, you want to just test a general association and not a linear one, so you use a Pearson Chi-square test. What is the Chi-square value? round to 2 decimals
+
+```{r}
+assocstats(table(train$casual_high, train$season))
+```
+
+## Question 2b
+
+You want to know if the occurrence of these times is related to the season of the year. Even though season is ordinal, you want to just test a general association and not a linear one, so you use a Pearson Chi-square test. What is the Chi-square value? round to 2 decimals
+
+Answer: Reject the null hypothesis
+
+## Question 2c
+
+If you were to perform a Mantel-Hanszel Chi-Square test, what is the chi-square value?
+
+```{r}
+CMHtest(table(train$casual_high, train$season))$table[1,]
+```
+
+## Question 2d 
+
+What is the result at significance level .001?
+
+Answer: Fail to reject the null hypothesis
+
+## Question 2e
+
+You also want to know if the occurrence of these times is related to whether or not the day is a holiday. Perform the appropriate chi-square test to test this association. What is the result at significance level .001?
+
+```{r}
+assocstats(table(train$casual_high, train$holiday))
+```
+
+
+
+
+
+
+
+

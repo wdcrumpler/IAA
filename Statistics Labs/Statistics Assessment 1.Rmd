@@ -1,0 +1,125 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(glmnet)
+library(ggplot2)
+library(gmodels)
+library(epitools)
+library(DescTools)
+library(vcd)
+library(ggpubr)
+library(vcdExtra)
+library(nortest)
+library(car)
+```
+
+# Question Set 1
+
+The data set sales is a training data set that contains information for daily sales from a large franchise.  The data set contains randomly selected days from 400 locations to measure the impact of holidays, weekends, population size, layout of store, number of years of operation of store and state on sales.  The goal is to find the best linear predictor (do NOT use higher order terms...NO power terms or interactions).  Since this is a training data set, you do not need to split this data.  The data is organized as follows:
+
+holiday: 1 = holiday and 0= not a holiday
+
+weekend: 1 = weekend and 0 = weekday
+
+pop: population size in 10,000s
+
+display: layout of the store with 1 = custom design and 0 = recommended design
+
+open: number of years the location was in operation
+
+state: the state in which the store is located with 1 = Georgia, 2 = North Carolina, 3 = South Carolina and 4 = Georgia
+
+y: Daily sales amount
+
+Be aware of data formats! For any statistical tests, use a significance level of 0.05.
+
+
+```{r}
+sales <- read_csv('https://raw.githubusercontent.com/IAA-Faculty/statistical_foundations/master/sales_train.csv')
+```
+
+```{r}
+head(sales)
+```
+
+
+```{r}
+sales$holiday <- as.factor(sales$holiday)
+sales$weekend <- as.factor(sales$weekend)
+sales$display <- as.factor(sales$display)
+sales$state <- as.factor(sales$state)
+```
+
+## Question 2
+
+Calculate the GVIF used in assessing multicollinearity.  Report the highest GVIF value from this regression (be sure to look at the correct column).  Round to two decimal places.
+
+```{r}
+sales_lm <- lm(y ~ holiday + weekend + pop + display + open + state, data = sales)
+car::vif(sales_lm)
+```
+
+Answer: 1.04
+
+## Question 3 
+
+Based on the GVIF values calculated in Question 1, is multicollinearity an issue?  Explain why or why not.
+
+Answer: No. Multicollinearity is typically signaled by a VIF above 10. All of the variables here have low VIFs, so we should not expect significant multicollinearity.
+
+## Question 4
+
+Perform a forward selection using AIC (do NOT include any higher order terms or interactions).  Write out the model.  In other words, y-hat =... (be sure to include coefficient values).
+
+```{r}
+sales_empty <- lm(y ~ 1, data = sales)
+
+sales_forward <- step(sales_empty, scope = list(lower = sales_empty, upper = sales_lm), direction = "forward", k = 2)
+
+summary(sales_forward)
+```
+
+Answer: y-hat = 0.980 * pop + 9.586 * holiday + -2.407 * display + 401.954
+
+## Question 5
+
+Check the Normality assumption for the linear model from the forward selection.  What did you use to assess Normality (be specific...what values did you use?  Did you use a test or a graph? What test or what graph?  What did it look like to help you make your decision).  What was your decision?
+
+```{r}
+ggqqplot(residuals(sales_forward))
+```
+
+```{r}
+shapiro.test(residuals(sales_forward))
+```
+
+```{r}
+ad.test(residuals(sales_forward))
+```
+
+Answer: The linear model appears normal. To determine this I looked at a QQ plot to ensure there were no significant deviations from the expected straight line. I also ran a Shapiro-Wilk (p = 0.615) and Anderson-Darling test (p = 0.371) to have a formal test, with both indicating that we could not reject the null.
+
+## Question 6
+
+Assess the homoscedasticity of variance assumption of the forward selection model.  What did you use to make this decision and what was your conclusion.
+
+```{r}
+plot(sales_forward)
+```
+
+Answer: The model appears homoscedastic. To evaluate this, I used plot(sales_forward) in R to generate a plot of the model residuals against fitted values. The residuals appeared to be plotted randomly, with no notable patterns indicating changes in variance across the fitted values. The plot of standardized residuals also shows no notable pattern.
+
+## Question 7
+
+There does not appear to be a pattern in the residual plot which means the assumption of linearity in the means is a reasonable assumption.
+
+Answer: True
+
+
